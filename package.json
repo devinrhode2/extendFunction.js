@@ -1,5 +1,5 @@
 {
- "name": "extend-function",
- "version": "0.0.1",
- "main": "extend-function.js"
+  "name": "extend-function",
+  "version": "0.0.2",
+  "main": "extend-function.js"
 }
