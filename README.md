@@ -1,4 +1,4 @@
-extendFunction.js
+extend-function.js
 =================
 
 The easiest way to overwrite other functions with additional functionality
