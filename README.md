@@ -54,3 +54,5 @@ extendFunction('strangeModule.strangeMethod', function(options, etc) {
   return returnValue;
 });
 ```
+
+MIT licensed
