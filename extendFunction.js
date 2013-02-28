@@ -9,8 +9,10 @@ function extendFunction(fnRef, addedFunctionality) {
     }
   } else if (Object.prototype.toString.call(fnRef) =='[object Function]') {
     oldOldFn = fnRef;
+  } else {
+    throw new Error('unknown type for first arg to extendFunction');
   }
- 
+
   var newFunc = function() {
     try {
       var args = [].slice.call(arguments);
@@ -18,9 +20,20 @@ function extendFunction(fnRef, addedFunctionality) {
       var called = false;
       var oldFunction = function() {
         called = true;
-        return oldOldFn.apply(this, [].slice.call(arguments));
-        //could use `args` instead of `arguments`, but then we assume you aren't changing the args
-        //and in fact, if you change the args you call oldFunction with, things won't work as expected
+        try {
+          return oldOldFn.apply(this, [].slice.call(arguments));
+          //could use `args` instead of `arguments`, but then we assume you aren't changing the args
+          //and in fact, if you change the args you call oldFunction with, things won't work as expected
+        } catch (e) {
+          if (Object.prototype.toString.call(oldOldFn) != '[object Function]') {
+            throw new Error(
+              fnRef + ' is not a function. ' + fnRef + ' toString is:'
+              oldOldFn + ' and is of type:' + typeof oldOldFn
+            );
+          } else {
+            throw e;
+          }
+        }
       };
 
       var newRet = addedFunctionality.call(this, args, oldFunction);
