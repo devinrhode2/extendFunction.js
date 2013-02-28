@@ -36,7 +36,7 @@ function extendFunction(fnRef, addedFunctionality) {
   };
  
   if (s && s.length === 0) {
-    eval('window.' + fnRef + ' = ' + newFunc.toString());
+    eval('(window || global).' + fnRef + ' = ' + newFunc.toString());
   } else {
     return newFunc;
   }
