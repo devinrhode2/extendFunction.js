@@ -48,9 +48,13 @@ function extendFunction(fnRef, addedFunctionality) {
         return newRet;
       }
     } catch (e) {
-      if (typeof onuncaughtError !== 'undefined') { //probably window.onuncaughtError but maybe not. you can var over it
-        onuncaughtError(e);
+      if (typeof onuncaughtException !== 'undefined') { //probably window.onuncaughtError but maybe not. you can var over it
+        onuncaughtException(e);
       } else {
+        typeof console !== 'undefined' && console.warn && console.warn(
+          'You should define a window.onuncaughtException handler for exceptions,' +
+          ' or use a library like Sheild.js'
+        );
         throw e;
       }
     }
