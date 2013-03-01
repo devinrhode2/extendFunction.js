@@ -49,7 +49,7 @@ function extendFunction(fnRef, addedFunctionality) {
       }
     } catch (e) {
       //probably window.onuncaughtException but maybe not. you can var over it
-      if (typeof onuncaughtException !== 'undefined') {
+      if (typeof onuncaughtException !== 'undefined' && Object.prototype.toString.call(onuncaughtException) == '[object Function]') {
         onuncaughtException(e);
       } else {
         typeof console !== 'undefined' && console.warn && console.warn(
