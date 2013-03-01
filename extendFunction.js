@@ -48,7 +48,8 @@ function extendFunction(fnRef, addedFunctionality) {
         return newRet;
       }
     } catch (e) {
-      if (typeof onuncaughtException !== 'undefined') { //probably window.onuncaughtError but maybe not. you can var over it
+      //probably window.onuncaughtException but maybe not. you can var over it
+      if (typeof onuncaughtException !== 'undefined') {
         onuncaughtException(e);
       } else {
         typeof console !== 'undefined' && console.warn && console.warn(
