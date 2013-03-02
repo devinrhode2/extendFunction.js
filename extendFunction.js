@@ -28,6 +28,7 @@ function extendFunction(fnRef, addedFunctionality) {
     while (s.length) {
       oldOldFn = oldOldFn[s.shift()];
     }
+    //we'll assume oldOldFn really is a function, and catch the error if there is one
   } else if (Object.prototype.toString.call(fnRef) =='[object Function]') {
     oldOldFn = fnRef;
   } else {
