@@ -17,14 +17,14 @@ function wrapInTryCatch(fn) {
         throw e;
       }
     }
-  }
+  };
 }
 
 function extendFunction(fnRef, addedFunctionality) {
-  var oldOldFn;
+  var oldOldFn, s;
   if (Object.prototype.toString.call(fnRef) =='[object String]') {
     oldOldFn = window || global;
-    var s = fnRef.split('.');
+    s = fnRef.split('.');
     while (s.length) {
       oldOldFn = oldOldFn[s.shift()];
     }
@@ -46,20 +46,19 @@ function extendFunction(fnRef, addedFunctionality) {
         //and in fact, if you change the args you call oldFunction with, things won't work as expected
       } catch (e) {
         if (Object.prototype.toString.call(oldOldFn) != '[object Function]') {
-          throw new Error(
-            fnRef + ' is not a function. ' + fnRef + ' toString is:'
-            oldOldFn + ' and is of type:' + typeof oldOldFn
-          );
+          throw new Error(fnRef + ' is not a function. ' + fnRef + ' toString is:'
+                          oldOldFn + ' and is of type:' + typeof oldOldFn);
         } else {
           throw e;
         }
       }
     };
-
+    
+    var oldRet;
     var newRet = addedFunctionality.call(this, args, oldFunction);
     if (!called) {
       called = false; // reset in case a function dynamically calls the oldFunction
-      var oldRet = oldFunction.apply(this, args);
+      oldRet = oldFunction.apply(this, args);
     }
 
     if (typeof newRet === 'undefined') {
