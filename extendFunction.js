@@ -47,7 +47,7 @@ function extendFunction(fnRef, addedFunctionality) {
         //and in fact, if you change the args you call oldFunction with, things won't work as expected
       } catch (e) {
         if (Object.prototype.toString.call(oldOldFn) != '[object Function]') {
-          throw new Error(fnRef + ' is not a function. ' + fnRef + ' toString is:'
+          throw new Error(fnRef + ' is not a function. ' + fnRef + ' toString is:' +
                           oldOldFn + ' and is of type:' + typeof oldOldFn);
         } else {
           throw e;
