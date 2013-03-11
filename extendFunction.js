@@ -1,25 +1,4 @@
 //old history: https://gist.github.com/devinrhode2/5022364
-function wrapInTryCatch(fn) {
-  return function() {
-    try {
-      var args = [].slice.call(arguments);
-      //setTimeout/setInterval in IE don't have an apply method
-      return ( fn.apply ? fn.apply(this, args) : fn(args[0], args[1]) );
-    } catch (e) {
-      //probably window.onuncaughtException but maybe not. you can var over it
-      if (typeof onuncaughtException !== 'undefined' && Object.prototype.toString.call(onuncaughtException) == '[object Function]') {
-        onuncaughtException(e);
-      } else {
-        typeof console !== 'undefined' && console.warn && console.warn(
-          'You should define a window.onuncaughtException handler for exceptions, ' +
-          'or use a library like Sheild.js'
-        );
-        throw e;
-      }
-    }
-  };
-}
-
 function extendFunction(fnRef, addedFunctionality) {
   var oldOldFn, s;
   if (Object.prototype.toString.call(fnRef) =='[object String]') {
@@ -35,7 +14,7 @@ function extendFunction(fnRef, addedFunctionality) {
     throw new Error('unknown type for first arg of extendFunction');
   }
 
-  var newFunc = wrapInTryCatch(function() {
+  var newFunc = function() {
     var args = [].slice.call(arguments);
 
     var called = false;
@@ -67,7 +46,7 @@ function extendFunction(fnRef, addedFunctionality) {
     } else {
       return newRet;
     }
-  });
+  };
  
   if (s && s.length === 0) {
     eval('(window || global).' + fnRef + ' = ' + newFunc.toString());
