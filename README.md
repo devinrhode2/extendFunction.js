@@ -37,7 +37,7 @@ extendFunction('console.log', function(args, nativeConsoleLog) {
  
 For non-global functions, you assign back like this:
 ```javascript
-localFunction = extendFunction(localFunction, function(args, originalLocalFunction){
+localFunction = extendFunction(localFunction, function(args, originalLocalFunction) {
   //your magic here!
 });
 ```
