@@ -1,23 +1,17 @@
 //old history: https://gist.github.com/devinrhode2/5022364
 function extendFunction(fnRef, addedFunctionality) {
-  //lodash's isObject, slightly modified
-  function isObject(value) {
-    // check if the value is the ECMAScript language type of Object
-    // http://es5.github.com/#x8
-    // and avoid a V8 bug
-    // http://code.google.com/p/v8/issues/detail?id=2291
-    return value ? (typeof value === 'function' || typeof value === 'object') : false;
-  }
+  var undefined;
   var oldOldFn, s;
   if (Object.prototype.toString.call(fnRef) =='[object String]') {
     oldOldFn = window || global;
     s = fnRef.split('.');
     while (s.length) {
-      oldOldFn = oldOldFn[s[0]];
-      if (isObject(oldOldFn)) {
-        s.shift();
-      } else {
-        throw new Error('Can\'t extend function ' + fnRef + ' because it\'s not defined as an object ');
+      oldOldFn = oldOldFn[s.shift()];
+      if (oldOldFn === undefined) {
+        throw new Error(
+          'Can\'t extend function ' + fnRef + ' because ' +
+          fnRef.replace(s.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
+        );
       }
     }
     //we'll assume oldOldFn really is a function, and catch the error if there is one
