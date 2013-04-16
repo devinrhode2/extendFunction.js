@@ -6,13 +6,21 @@ function extendFunction(fnRef, addedFunctionality) {
     oldOldFn = window || global;
     s = fnRef.split('.');
     while (s.length) {
-      oldOldFn = oldOldFn[s.shift()];
-      if (oldOldFn === undefined) {
-        throw new Error(
-          'Can\'t extend function ' + fnRef + ' because ' +
-          fnRef.replace(s.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
-        );
+      try {
+        oldOldFn = oldOldFn[s[0]];
+      } catch (e) {
+        if (oldOldFn === undefined) {
+          throw new Error(
+            'Can\'t extend function ' + fnRef + ' because ' +
+            fnRef.replace(s.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
+          );
+        } else {
+          throw e;
+        }
       }
+      
+      //remove first item since that's valid and we've accessed the property, and assigned that property to oldOldFn
+      s.shift();
     }
     //we'll assume oldOldFn really is a function, and catch the error if there is one
   } else if (Object.prototype.toString.call(fnRef) =='[object Function]') {
