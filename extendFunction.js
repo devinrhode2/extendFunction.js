@@ -14,11 +14,11 @@ function extendFunction(fnRef, addedFunctionality) {
     throw new Error('unknown type for first arg of extendFunction');
   }
 
-  var newFunc = function() {
+  function newFunc() {
     var args = [].slice.call(arguments);
 
     var called = false;
-    var oldFunction = function() {
+    function oldFunction() {
       called = true;
       try {
         return oldOldFn.apply(this, [].slice.call(arguments));
@@ -32,7 +32,7 @@ function extendFunction(fnRef, addedFunctionality) {
           throw e;
         }
       }
-    };
+    }
     
     var oldRet;
     var newRet = addedFunctionality.call(this, args, oldFunction);
@@ -46,7 +46,7 @@ function extendFunction(fnRef, addedFunctionality) {
     } else {
       return newRet;
     }
-  };
+  }
  
   if (s && s.length === 0) {
     eval('(window || global).' + fnRef + ' = ' + newFunc.toString());
