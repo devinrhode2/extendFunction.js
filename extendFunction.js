@@ -1,8 +1,11 @@
 function extendFunction(fnPropertyRef, addedFunctionality) {
+  //not doing 'use strict' because it changes what `this` means, and extendFunction should be as seamless as possible
+  //http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
+  //'use strict';
   var undefined;
   var oldFn, propertyArray;
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
-    oldFn = window || global;
+    oldFn = (typeof window !== "undefined" ? window : global);
     propertyArray = fnPropertyRef.split('.');
     while (propertyArray.length) { //while it's not zero (zero is falsey in javascript)
       try {
@@ -36,6 +39,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     oldFn = function () {
       called = true;
       try {
+        // should we store this above and then use that variable? I don't know
         return orig_oldFn.apply(this, Array.prototype.slice.call(arguments));
         //we use standard dynamic `arguments` instead of `args` because there are not necessarily always the same
         //if a user modifies the arguments they call originalFunction with (extendFunction(function(args, originalFunction){ .. ) then we have to respect that
@@ -66,8 +70,8 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     }
   }
  
-  if (s && s.length === 0) {
-    eval('(window || global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
+  if (propertyArray && propertyArray.length === 0) {
+    eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
   } else {
     return extendedFunction;
   }
