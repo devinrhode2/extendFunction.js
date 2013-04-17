@@ -1,62 +1,65 @@
-//old history: https://gist.github.com/devinrhode2/5022364
-function extendFunction(fnRef, addedFunctionality) {
+function extendFunction(fnPropertyRef, addedFunctionality) {
   var undefined;
-  var oldOldFn, s;
-  if (Object.prototype.toString.call(fnRef) =='[object String]') {
-    oldOldFn = window || global;
-    s = fnRef.split('.');
-    while (s.length) {
+  var oldFn, propertyArray;
+  if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
+    oldFn = window || global;
+    propertyArray = fnPropertyRef.split('.');
+    while (propertyArray.length) { //while it's not zero (zero is falsey in javascript)
       try {
-        oldOldFn = oldOldFn[s[0]];
+        oldFn = oldFn[propertyArray[0]];
+        //on last iteration, we assume oldFn is a function, and catch the error if it isn't
       } catch (e) {
-        if (oldOldFn === undefined) {
+        if (oldFn === undefined) {
           throw new Error(
-            'Can\'t extend function ' + fnRef + ' because ' +
-            fnRef.replace(s.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
+            'Can\'t extend function ' + fnPropertyRef + ' because ' +
+            fnPropertyRef.replace(propertyArray.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
           );
         } else {
           throw e;
         }
       }
       
-      //remove first item since that's valid and we've accessed the property, and assigned that property to oldOldFn
-      s.shift();
+      //remove first item since that's valid and we've accessed the property, and assigned that property to oldFn
+      propertyArray.shift();
     }
-    //we'll assume oldOldFn really is a function, and catch the error if there is one
-  } else if (Object.prototype.toString.call(fnRef) =='[object Function]') {
-    oldOldFn = fnRef;
   } else {
-    throw new Error('unknown type for first arg of extendFunction');
+    //else fnPropertyRef is actually the oldFn, or at least we'll assume so and catch the error if it isn't
+    oldFn = fnPropertyRef;
   }
 
-  function extendedFunc() {
-    var args = [].slice.call(arguments);
+  function extendedFunction() {
+    var args = Array.prototype.slice.call(arguments); //we use Array.prototype.slice instead of [].slice because it doesn't instantiate a new array
 
+    //modify oldFn to track if it was called
     var called = false;
-    function oldFunction() {
+    var orig_oldFn = oldFn;
+    oldFn = function () {
       called = true;
       try {
-        return oldOldFn.apply(this, [].slice.call(arguments));
-        //could use `args` instead of `arguments`, but then we assume you aren't changing the args
-        //and in fact, if you change the args you call oldFunction with, things won't work as expected
+        return orig_oldFn.apply(this, Array.prototype.slice.call(arguments));
+        //we use standard dynamic `arguments` instead of `args` because there are not necessarily always the same
+        //if a user modifies the arguments they call originalFunction with (extendFunction(function(args, originalFunction){ .. ) then we have to respect that
       } catch (e) {
-        if (Object.prototype.toString.call(oldOldFn) != '[object Function]') {
-          throw new Error(fnRef + ' is not a function. ' + fnRef + ' toString is:' +
-                          oldOldFn + ' and is of type:' + typeof oldOldFn);
+        //above we assume oldFn is a function if it's not a string (for efficiency) - here, we catch and correct if it wasn't a function.
+        //yes, it's more efficient to originally assume it's a function
+        if (Object.prototype.toString.call(orig_oldFn) != '[object Function]') {
+          throw new Error(fnPropertyRef + ' is not a function. ' + fnPropertyRef + ' toString is:' +
+                          orig_oldFn + ' and is of type:' + typeof orig_oldFn);
         } else {
           throw e;
         }
       }
-    }
-    
+    };
+
     var oldRet;
-    var newRet = addedFunctionality.call(this, args, oldFunction);
+    var newRet = addedFunctionality.call(this, args, oldFn);
     if (!called) {
-      called = false; // reset in case a function dynamically calls the oldFunction
-      oldRet = oldFunction.apply(this, args);
+      called = false; // reset in case a function dynamically calls the oldFn
+                      // TODO api to tell extendFunction that oldFn will be called asynchronously
+      oldRet = oldFn.apply(this, args);
     }
 
-    if (typeof newRet === 'undefined') {
+    if (newRet === undefined) {
       return oldRet;
     } else {
       return newRet;
@@ -64,8 +67,8 @@ function extendFunction(fnRef, addedFunctionality) {
   }
  
   if (s && s.length === 0) {
-    eval('(window || global).' + fnRef + ' = ' + extendedFunc.toString());
+    eval('(window || global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
   } else {
-    return extendedFunc;
+    return extendedFunction;
   }
 }
