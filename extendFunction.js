@@ -2,7 +2,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   //not doing 'use strict' because it changes what `this` means, and extendFunction should be as seamless as possible
   //http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
   //'use strict';
-  //however, if a global 'use strict' is leaked, you can expect we just use the `this` keyword.. :/?
+  //however, if a global 'use strict' is leaked, you can expect we just use the `this` keyword.. (I wish I could solve your bugs for you, but I can't here)
   var undefined;
   var oldFn, propertyArray;
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
