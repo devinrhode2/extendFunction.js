@@ -4,42 +4,58 @@ extendFunction.js
 The easiest way to overwrite other functions with additional functionality
  
 Example:
-Let's modify alert to keep a history array of the logs:
+Let's modify alert to keep a history array of all the messages we alert:
 ```javascript
+// initialize empty alertHistory array for the messages..
 window.alertHistory = [];
+// extend alert with additional functionality. 
 extendFunction('alert', function(args) {
-  var message = args[0];
-  alertHistory.push(message);
+  // args is an array of the arguments alert was called with
+  // therefore, args[0] is the alert message.
+  // We'll push this onto the alertHistory array for reference later
+  alertHistory.push(args[0]);
 });
-```
-
-Test it:
-```javascript
+// Test it!
 alert('a message');
+console.log(alertHistory);
 if (alertHistory[0] === 'a message') {
-  alert('oh geez this function is powerful!');
+  console.warn('extendFunction worked!');
 }
 ```
 
-Now let's add ' from DevinRhode2' to every alert message
+So extendFunction takes 2 parameters: `extendFunction(theFunction, extraFunctionality)`
+
+Now let's add __" from DevinRhode2"__ to every alert message
 ```javascript
 extendFunction('alert', function(args, nativeAlert) {
-  //...
-  nativeAlert(message + ' from DevinRhode2')
+  // the second argument here is the nativeAlert function
+  // precisely, that's window.alert before it was modified
+  nativeAlert(args[0] + ' from DevinRhode2')
+  // because you called nativeAlert, extendFunction doesn't.
+  // however, if you don't call it, then extendFunction will
+  // If you don't want the original function called, then you should just overwrite the function:
+  // window.alert = function alertOverride() { ... };
 });
 ```
-Works for methods too:
+extendFunction also works for methods:
 ```javascript
 extendFunction('console.log', function(args, nativeConsoleLog) {
   //omg console.log was called!
 });
 ```
- 
-For non-global functions, you assign back like this:
+
+But if your functions are not global like `alert` and `console.log`, then you need to do this:
 ```javascript
 localFunction = extendFunction(localFunction, function(args, originalLocalFunction) {
   //your magic here!
 });
+//without extendFunction, it would look like this:
+var oldLocalFunction = localFunction;
+localFunction = function(paramA, paramB) {
+ // your magic here!
+ var args = Array.prototype.slice.call(arguments);
+ return oldLocalFunction.apply(this, args);
+};
 ```
  
 Modify return values:
@@ -59,22 +75,11 @@ extendFunction('$.ajax', function(args, prevFunc) {
 
   //prevFunc is the original $.ajax
   //call that and store the value to return
-  var ret = prevFunc.apply(this, args);
-  ret.fail = extendFunction(ret.fail, function(args) {
-    if (offlineArgs(args)) {
-      //ignore, failure b/c of being offline
-    } else {
-      //report
-      var e = new Error(args[0]);
-      e.stack = stackOnSend;
-      onuncaughtException(e);
-    }
-
-    //nothing returned, so extendFunction calls
-    //the original fail function and returns
-    //the value returned from it
+  var returnValue = prevFunc.apply(this, args);
+  returnValue.fail(function(){
+    console.error('request failed:', arguments, 'stackOnSend:', stackOnSend);
   });
-  return ret;
+  return returnValue;
 });
 ```
 
