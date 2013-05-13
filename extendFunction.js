@@ -1,3 +1,10 @@
+/*! 
+ * extendFunction.js v0.0.5 (probably) - The easiest way to other functions with additional functionality
+ * github.com/devinrhode2/extendFunction.js
+ * 
+ * Copyright (c) 2013 extendFunction.js contributors
+ * MIT Licensed
+ */
 function extendFunction(fnPropertyRef, addedFunctionality) {
   //not doing 'use strict' because it changes what `this` means, and extendFunction should be as seamless as possible
   //http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
