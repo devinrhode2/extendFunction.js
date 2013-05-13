@@ -8,10 +8,13 @@
 function extendFunction(fnPropertyRef, addedFunctionality) {
   //not doing 'use strict' because it changes what `this` means, and extendFunction should be as seamless as possible
   //http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
-  //'use strict';
   //however, if a global 'use strict' is leaked, you can expect we just use the `this` keyword.. (I wish I could solve your bugs for you, but I can't here)
-  var notDefined; // undefined is a reserved word soo...
+
+  // undefined is a reserved word soo..
+  var notDefined;
+
   var oldFn, propertyArray;
+
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
     oldFn = (typeof window !== "undefined" ? window : global);
     propertyArray = fnPropertyRef.split('.');
@@ -38,10 +41,10 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     oldFn = fnPropertyRef;
   }
 
-  function extendedFunction() {
+  function extension() {
     var args = Array.prototype.slice.call(arguments); //we use Array.prototype.slice instead of [].slice because it doesn't instantiate a new array
 
-    //modify oldFn to track if it was called
+    //extend oldFn to track if it was called
     var called = false;
     var orig_oldFn = oldFn;
     oldFn = function () {
@@ -79,8 +82,8 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   }
  
   if (propertyArray && propertyArray.length === 0) {
-    eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
+    eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extension.toString());
   } else {
-    return extendedFunction;
+    return extension;
   }
 }
