@@ -10,7 +10,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   //http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
   //'use strict';
   //however, if a global 'use strict' is leaked, you can expect we just use the `this` keyword.. (I wish I could solve your bugs for you, but I can't here)
-  var undefined;
+  var notDefined; // undefined is a reserved word soo...
   var oldFn, propertyArray;
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
     oldFn = (typeof window !== "undefined" ? window : global);
@@ -20,7 +20,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
         oldFn = oldFn[propertyArray[0]];
         //on last iteration, we assume oldFn is a function, and catch the error if it isn't
       } catch (e) {
-        if (oldFn === undefined) {
+        if (oldFn === notDefined) {
           throw new Error(
             'Can\'t extend function ' + fnPropertyRef + ' because ' +
             fnPropertyRef.replace(propertyArray.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
@@ -71,7 +71,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
       oldRet = oldFn.apply(this, args);
     }
 
-    if (newRet === undefined) {
+    if (newRet === notDefined) {
       return oldRet;
     } else {
       return newRet;
