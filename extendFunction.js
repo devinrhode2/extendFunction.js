@@ -13,22 +13,28 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   // undefined is a reserved word soo..
   var notDefined;
 
-  var oldFn, propertyArray;
-
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
-    oldFn = (typeof window !== "undefined" ? window : global);
-    propertyArray = fnPropertyRef.split('.');
-    while (propertyArray.length) { //while it's not zero (zero is falsey in javascript)
+    
+    //split 'jQuery.ajax' into ['jQuery', 'ajax']
+    var propertyArray = fnPropertyRef.split('.');
+    
+    //start with the global object, and iteratively access each property, re-assigning to oldFn each time
+    var oldFn = (typeof window !== "undefined" ? window : global);
+    
+    //while there are properties left to access..
+    while (propertyArray.length) {
       try {
         oldFn = oldFn[propertyArray[0]];
         //on last iteration, we assume oldFn is a function, and catch the error if it isn't
       } catch (e) {
+        //oh no! did we have bad input?
         if (oldFn === notDefined) {
           throw new Error(
             'Can\'t extend function ' + fnPropertyRef + ' because ' +
-            fnPropertyRef.replace(propertyArray.join('.'), '').replace(/(\.$)/g, '') + ' is not defined'
+            fnPropertyRef.replace(propertyArray.join('.'), '').replace(/(\.$)/g, '') + ' is not defined on the global object'
           );
         } else {
+          //who knows what happened!
           throw e;
         }
       }
