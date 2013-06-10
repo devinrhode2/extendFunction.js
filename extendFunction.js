@@ -48,7 +48,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     oldFn = fnPropertyRef;
   }
 
-  function extension() {
+  function extendedFunction() {
     var args = Array.prototype.slice.call(arguments); // we use Array.prototype.slice instead of [].slice because it doesn't instantiate a new array
 
     // extend oldFn to track if it was called
@@ -89,8 +89,8 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   }
  
   if (propertyArray && propertyArray.length === 0) {
-    eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extension.toString());
+    eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
   } else {
-    return extension;
+    return extendedFunction;
   }
 }
