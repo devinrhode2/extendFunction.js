@@ -6,13 +6,11 @@ The easiest way to overwrite other functions with additional functionality
 Example:
 Let's modify alert to keep a history array of all the messages we alert:
 ```javascript
-// initialize empty alertHistory array for the messages..
 window.alertHistory = [];
 // extend alert with additional functionality. 
 extendFunction('alert', function(args) {
   // args is an array of the arguments alert was called with
-  // therefore, args[0] is the alert message.
-  // We'll push this onto the alertHistory array for reference later
+  // args[0] is the alert message.
   alertHistory.push(args[0]);
 });
 // Test it!
