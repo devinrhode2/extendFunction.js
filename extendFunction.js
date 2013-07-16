@@ -49,7 +49,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   }
 
   function extendedFunction() {
-    var args = Array.prototype.slice.call(arguments); // we use Array.prototype.slice instead of [].slice because it doesn't instantiate a new array
+    var args = Array.prototype.slice.call(arguments); // we use Array.prototype.slice instead of [].slice because it doesn't allocate a new array
 
     // extend oldFn to track if it was called
     var called = false;
@@ -73,12 +73,21 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
       }
     };
 
+    var modifiedThis = this;
+    var callOldFn = true;
+    function iWillCallOldFn() {
+      callOldFn = false; //don't call oldFn
+    }
+    // PROPOSAL: api for telling extendFunction not to call the oldFunction itself,
+    // because the users additionalFunctionality will call it asynchronously
+    modifiedThis.iWillCallOldFn = iWillCallOldFn;
     var oldRet;
-    var newRet = addedFunctionality.call(this, args, oldFn);
+    var newRet = addedFunctionality.call(modifiedThis, args, oldFn);
     if (!called) {
       called = false; // reset in case a function dynamically calls the oldFn
-                      // TODO api to tell extendFunction that oldFn will be called asynchronously
-      oldRet = oldFn.apply(this, args);
+      if (callOldFn) {
+        oldRet = oldFn.apply(this, args);
+      }
     }
 
     if (newRet === notDefined) {
