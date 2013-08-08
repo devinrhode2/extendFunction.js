@@ -6,6 +6,8 @@ The easiest way to overwrite other functions with additional functionality
 Example:
 Let's modify alert to keep a history array of all the messages we alert:
 ```javascript
+// paste extendFunction.js into your console and then run this :)
+
 window.alertHistory = [];
 // extend alert with additional functionality. 
 extendFunction('alert', function(args) {
