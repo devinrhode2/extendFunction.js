@@ -103,3 +103,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     return extendedFunction;
   }
 }
+
+if (typeof module !== 'undefined') {
+  module.exports = extendFunction;
+}
