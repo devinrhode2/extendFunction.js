@@ -6,7 +6,7 @@ The easiest way to overwrite other functions with additional functionality
 Example:
 Let's modify alert to keep a history array of all the messages we alert:
 ```javascript
-// paste extendFunction.js into your console and these examples in your console :)
+// paste extendFunction.js into your console and run these examples in your console :)
 
 window.alertHistory = [];
 // extend alert with additional functionality. 
@@ -40,16 +40,18 @@ extendFunction('alert', function(args, nativeAlert) {
 extendFunction also works for methods:
 ```javascript
 extendFunction('console.log', function(args, nativeConsoleLog) {
-  //omg console.log was called!
+  // omg console.log was called!
 });
 ```
 
 But if your functions are not global like `alert` and `console.log`, then you need to do this:
 ```javascript
 localFunction = extendFunction(localFunction, function(args, originalLocalFunction) {
-  //your magic here!
+  // your magic here!
 });
-//without extendFunction, it would look like this:
+```
+without extendFunction, you have to write this mess of code:
+```
 var oldLocalFunction = localFunction;
 localFunction = function(paramA, paramB) {
  // your magic here!
@@ -62,6 +64,7 @@ Modify return values:
 ```javascript
 extendFunction('strangeModule.strangeMethod', function(args, prevFunc) {
   var returnValue = prevFunc.apply(this, args);
+  // docs on apply: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/apply
 
   returnValue.extraInfo = 'idk';
   return returnValue;
