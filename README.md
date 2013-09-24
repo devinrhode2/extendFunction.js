@@ -87,3 +87,7 @@ extendFunction('$.ajax', function(args, prevFunc) {
 ```
 
 MIT licensed
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/devinrhode2/extendfunction.js/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
