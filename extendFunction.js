@@ -1,45 +1,60 @@
-/*! 
- * extendFunction.js - The easiest way to other functions with additional functionality - v0.0.5 (probably)
+/*!
+ * extendFunction.js - The easiest way to other functions with additional functionality
+ *
  * github.com/devinrhode2/extendFunction.js
- * 
+ *
  * Copyright (c) 2013 extendFunction.js contributors
  * MIT Licensed
  */
 function extendFunction(fnPropertyRef, addedFunctionality) {
-  // not doing 'use strict' because it changes what `this` means, and extendFunction should be as seamless as possible
+  // not doing 'use strict' because it changes what `this` means, and extendFunction
+  // should be as seamless as possible
   // http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
-  // however, if a global 'use strict' is leaked, you can expect we just use the `this` keyword.. (I wish I could solve your bugs for you, but I can't here)
+  // however, if a global 'use strict' is leaked, you can expect we just use the `this`
+  // keyword.. (I wish I could solve your bugs for you, but I can't here)
 
-  // undefined is a reserved word soo..
-  var notDefined;
+  var undefined;
 
-  // just like underscore/lodash
+  // type check just like underscore/lodash
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
-    
-    // split 'jQuery.ajax' into ['jQuery', 'ajax']
+
+    // Example: split 'jQuery.ajax' into ['jQuery', 'ajax']
     var propertyArray = fnPropertyRef.split('.');
-    
-    // start with the global object, and iteratively access each property, re-assigning to oldFn each time
+
+    // start with the global object, and iteratively access each property,
+    // re-assigning to oldFn each time
+    // Example:
+    //   oldFn = window; oldFn = oldFn[prop]; oldFn = oldFn[prop];
+    // Aka:
+    //  oldFn = window.jQuery.ajax;
     var oldFn = (typeof window !== "undefined" ? window : global);
-    
-    // while there are properties left to access..
+
+    // so while there are properties left to access..
     while (propertyArray.length) {
       try {
         oldFn = oldFn[propertyArray[0]];
-        // on last iteration, we assume oldFn is a function, and catch the error if it isn't
-      } catch (e) {
-        // oh no! did we have bad input?
-        if (oldFn === notDefined) {
+        // Why not just .pop or .shift ?
+        // Well, if oldFn[propArray[0]]       is      undefined,
+        // then     oldFn[propArray[0]][propArray[1]] will throw an error because this is essentially doing window.undefined.undefined
+        // When oldFn.undefined.undefined throws an exception, oldFn still just === undefined (ultimately probably from oldFn.someUndefinedPropery)
+        //
+        // ...but don't we want to prevent having oldFn.undefined?
+        // not here.
+        // We'll assume people have good input, but catch the exception below when it happens.
+      } catch (readPropOfUndefinedError) {
+        if (oldFn === undefined) {
+          fnPropertyRef = 'window.' + fnPropertyRef;
+          var oneLessProperty =
           throw new Error(
             'Can\'t extend function ' + fnPropertyRef + ' because ' +
-            fnPropertyRef.replace(propertyArray.join('.'), '').replace(/(\.$)/g, '') + ' is not defined on the global object'
+            fnPropertyRef + ' and ' + fnPropertyRef.split('.').pop() + ' are not defined'
           );
         } else {
-          // who knows what happened!
-          throw e;
+          // ...who knows what happened!
+          throw readPropOfUndefinedError;
         }
       }
-      
+
       // remove first item since that's valid and we've accessed the property, and assigned that property to oldFn
       propertyArray.shift();
     }
@@ -62,7 +77,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
         // we use standard dynamic `arguments` instead of `args` because there are not necessarily always the same
         // if a user modifies the arguments they call originalFunction with (extendFunction(function(args, originalFunction){ .. ) then we have to respect that
       } catch (e) {
-        // above we assume oldFn is a function if it's not a string (for efficiency) - here, we catch and correct if it wasn't a function.
+        // above we assumed oldFn is a function if it's not a string (for efficiency) - here, we catch and correct if it wasn't a function.
         // yes, it's more efficient to originally assume it's a function
         if (Object.prototype.toString.call(orig_oldFn) != '[object Function]') {
           throw new Error(fnPropertyRef + ' is not a function. ' + fnPropertyRef + ' toString is:' +
@@ -90,13 +105,13 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
       }
     }
 
-    if (newRet === notDefined) {
+    if (newRet === undefined) {
       return oldRet;
     } else {
       return newRet;
     }
   }
- 
+
   if (propertyArray && propertyArray.length === 0) {
     eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
   } else {
