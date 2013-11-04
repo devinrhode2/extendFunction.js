@@ -27,12 +27,12 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     //   oldFn = window; oldFn = oldFn[prop]; oldFn = oldFn[prop];
     // Aka:
     //  oldFn = window.jQuery.ajax;
-    var oldFn = (typeof window !== "undefined" ? window : global);
+    var oldFn = (typeof window !== 'undefined' ? window : global);
 
     // so while there are properties left to access..
     while (propertyArray.length) {
       try {
-        oldFn = oldFn[propertyArray[0]];
+        oldFn = oldFn[propertyArray.shift()];
         // Why not just .pop or .shift ?
         // Well, if oldFn[propArray[0]]       is      undefined,
         // then     oldFn[propArray[0]][propArray[1]] will throw an error because this is essentially doing window.undefined.undefined
@@ -43,20 +43,12 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
         // We'll assume people have good input, but catch the exception below when it happens.
       } catch (readPropOfUndefinedError) {
         if (oldFn === undefined) {
-          fnPropertyRef = 'window.' + fnPropertyRef;
-          var oneLessProperty =
-          throw new Error(
-            'Can\'t extend function ' + fnPropertyRef + ' because ' +
-            fnPropertyRef + ' and ' + fnPropertyRef.split('.').pop() + ' are not defined'
-          );
+          throw new Error('window.' + fnPropertyRef + ' is undefined and therefore cannot be extended as a function.');
         } else {
           // ...who knows what happened!
           throw readPropOfUndefinedError;
         }
       }
-
-      // remove first item since that's valid and we've accessed the property, and assigned that property to oldFn
-      propertyArray.shift();
     }
   } else {
     // else fnPropertyRef is actually the oldFn, or at least we'll assume so and catch the error if it isn't
