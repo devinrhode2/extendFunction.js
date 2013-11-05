@@ -108,7 +108,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   extendedFunction.length = oldFn.length;
   //maintain prototype chain..
   extendedFunction.prototype = oldFn.prototype;
-  //I'm pretty sure if someone does `new wrapInTryCatch(..)` nothing different happens at all.
+  //TODO: I'm not sure if someone does `new extendedFunction(..)` nothing different will happen
 
   if (propertyArray && propertyArray.length === 0) {
     eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
