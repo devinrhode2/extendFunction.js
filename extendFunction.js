@@ -15,7 +15,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
 
   var undefined;
 
-  // type check just like underscore/lodash
+  // type check like underscore/lodash
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
 
     // Example: split 'jQuery.ajax' into ['jQuery', 'ajax']
@@ -23,30 +23,28 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
 
     // start with the global object, and iteratively access each property,
     // re-assigning to oldFn each time
-    // Example:
-    //   oldFn = window; oldFn = oldFn[prop]; oldFn = oldFn[prop];
-    // Aka:
-    //  oldFn = window.jQuery.ajax;
-    var oldFn = (typeof window !== 'undefined' ? window : global);
+    // For example, this dynamic code:
+    //  oldFn = window; oldFn = oldFn[prop]; oldFn = oldFn[nextProp]; ..
+    // Could ultimately boil down to this static code:
+    //  oldFn = window.$.fn.jQueryPluginFunction;
+    var global = (typeof window !== 'undefined' ? window : global);
+    var oldFn = global;
 
     // so while there are properties left to access..
     while (propertyArray.length) {
       try {
         oldFn = oldFn[propertyArray.shift()];
-        // Why not just .pop or .shift ?
-        // Well, if oldFn[propArray[0]]       is      undefined,
-        // then     oldFn[propArray[0]][propArray[1]] will throw an error because this is essentially doing window.undefined.undefined
-        // When oldFn.undefined.undefined throws an exception, oldFn still just === undefined (ultimately probably from oldFn.someUndefinedPropery)
-        //
-        // ...but don't we want to prevent having oldFn.undefined?
-        // not here.
-        // We'll assume people have good input, but catch the exception below when it happens.
-      } catch (readPropOfUndefinedError) {
+        //  if  oldFn[propArray[0]]       is      undefined,
+        // then oldFn[propArray[0]][propArray[1]] will throw because this is essentially doing window.undefined.undefined
+      } catch (cantReadPropOfUndefined) {
+        // And now we've caught that exception. oldFn should still just === undefined (essentially like window.undefined aka oldFn.notDefinedProperty)
         if (oldFn === undefined) {
-          throw new Error('window.' + fnPropertyRef + ' is undefined and therefore cannot be extended as a function.');
+          // ...but don't we want to prevent having oldFn.undefined in the first place?
+          // Nope, we just assume good input for efficiency, but catch the exception here when it happens.
+          throw new TypeError('window.' + fnPropertyRef + ' is undefined and therefore cannot be extended as a function.');
         } else {
           // ...who knows what happened!
-          throw readPropOfUndefinedError;
+          throw cantReadPropOfUndefined;
         }
       }
     }
@@ -54,6 +52,8 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     // else fnPropertyRef is actually the oldFn, or at least we'll assume so and catch the error if it isn't
     oldFn = fnPropertyRef;
   }
+
+  //oldFn should now be a function. (If it isn't we'll catch that error specifically)
 
   function extendedFunction() {
     var args = Array.prototype.slice.call(arguments); // we use Array.prototype.slice instead of [].slice because it doesn't allocate a new array
@@ -72,10 +72,10 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
         // above we assumed oldFn is a function if it's not a string (for efficiency) - here, we catch and correct if it wasn't a function.
         // yes, it's more efficient to originally assume it's a function
         if (Object.prototype.toString.call(orig_oldFn) != '[object Function]') {
-          throw new Error(fnPropertyRef + ' is not a function. ' + fnPropertyRef + ' toString is:' +
+          throw new TypeError(fnPropertyRef + ' is not a function. ' + fnPropertyRef + ' toString value is:' +
                           orig_oldFn + ' and is of type:' + typeof orig_oldFn);
         } else {
-          throw e;
+          fireUncaughtExceptionEvent(e);
         }
       }
     };
@@ -104,11 +104,88 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     }
   }
 
+  //preserve function.length since extendedFunction doesn't list arguments!
+  extendedFunction.length = oldFn.length;
+  //maintain prototype chain..
+  extendedFunction.prototype = oldFn.prototype;
+  //I'm pretty sure if someone does `new wrapInTryCatch(..)` nothing different happens at all.
+
   if (propertyArray && propertyArray.length === 0) {
     eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
   } else {
     return extendedFunction;
   }
+}
+
+function fireUncaughtExceptonEvent(uncaughtException) {
+  // uncaughtException's get sent to onuncaughtException:
+  try {
+    onuncaughtException(uncaughtException);
+
+    // I use this try-catch structure instead of several if checks for efficiency
+  } catch (exceptionCallingOnUncaughtException) { // what a gnarly exception..
+
+    if (typeof onuncaughtException === 'undefined') {
+
+      exceptionalException(new Error('You need assign window.onuncaughtException to some function.'));
+
+    } else { // apparently `onuncaughtException` IS DEFINED...
+      if (Object.prototype.toString.call(onuncaughtException) != '[object Function]') {
+        exceptionalException(new TypeError('onuncaughtException is not a function'));
+      } else {
+        exceptionalException(exceptionCallingOnUncaughtException);
+        exceptionalException(uncaughtException);
+      }
+    }
+
+  } // catch exceptionCallingOnUncaughtException
+}
+
+
+function wrapInTryCatch(func) {
+  // Define a function that simply returns what func returns, and forwards the arguments
+  function wrappedFunction() {
+    try {
+      /**
+      If someone does new SomeWrappedFunction(),
+      the value of this is an instanceof wrappedFunction.
+
+      But thanks to the line at the bottom of wrapInTryCatch,
+      wrappedFunction is an instanceof the original function,
+
+      `this` gets all the right properties, but a resulting objects properties may not
+      be it's *own* properties.. well this check shows there are zero side effects:
+
+      function printThis() {
+        this.prop = 'this.prop value!';
+        console.log('this:', this);
+        console.log('this.proto:', this.prototype);
+      }
+      printThis.prototype.protoProp = 'protoProp value!';
+      function printProperties(obj) {
+        for (var p in obj) {
+          console.log(
+            (obj.hasOwnProperty(p) ? '... OWNED ' : 'NOT OWNED ') + p + ': ' + obj[p]
+          );
+        }
+      }
+      printThis();
+      printProperties(new printThis());
+      printThis = wrapInTryCatch(printThis);
+      printThis();
+      printProperties(new printThis());
+      */
+      return func.apply(this, Array.prototype.slice.call(arguments) );
+    } catch (uncaughtException) {
+      fireUncaughtExceptionEvent(uncaughtException);
+    }
+  }
+  //preserve function.length since wrappedFunction doesn't list arguments!
+  wrappedFunction.length = func.length;
+  //maintain prototype chain..
+  wrappedFunction.prototype = func.prototype;
+  //I'm pretty sure if someone does `new wrapInTryCatch(..)` nothing different happens at all.
+  return wrappedFunction;
 }
 
 if (typeof module !== 'undefined') {
