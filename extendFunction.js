@@ -6,14 +6,13 @@
  * Copyright (c) 2013 extendFunction.js contributors
  * MIT Licensed
  */
+(function(window, undefined){
 function extendFunction(fnPropertyRef, addedFunctionality) {
   // not doing 'use strict' because it changes what `this` means, and extendFunction
   // should be as seamless as possible
   // http://scriptogr.am/micmath/post/should-you-use-strict-in-your-production-javascript
   // however, if a global 'use strict' is leaked, you can expect we just use the `this`
   // keyword.. (I wish I could solve your bugs for you, but I can't here)
-
-  var undefined;
 
   // type check like underscore/lodash
   if (Object.prototype.toString.call(fnPropertyRef) == '[object String]') {
@@ -27,8 +26,7 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
     //  oldFn = window; oldFn = oldFn[prop]; oldFn = oldFn[nextProp]; ..
     // Could ultimately boil down to this static code:
     //  oldFn = window.$.fn.jQueryPluginFunction;
-    var global = (typeof window !== 'undefined' ? window : global);
-    var oldFn = global;
+    var oldFn = window;
 
     // so while there are properties left to access..
     while (propertyArray.length) {
@@ -75,7 +73,11 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
           throw new TypeError(fnPropertyRef + ' is not a function. ' + fnPropertyRef + ' toString value is:' +
                           orig_oldFn + ' and is of type:' + typeof orig_oldFn);
         } else {
-          fireUncaughtExceptionEvent(e);
+          if (window.onuncaughtException) {
+            onuncaughtException(e);
+          } else {
+            throw e
+          }
         }
       }
     };
@@ -110,6 +112,9 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
   extendedFunction.prototype = oldFn.prototype;
   //TODO: I'm not sure if someone does `new extendedFunction(..)` nothing different will happen
 
+  // Maintain constructor property
+  extendedFunction.constructor = oldFn.constructor;
+
   if (propertyArray && propertyArray.length === 0) {
     eval('(typeof window !== "undefined" ? window : global).' + fnPropertyRef + ' = ' + extendedFunction.toString());
   } else {
@@ -118,5 +123,6 @@ function extendFunction(fnPropertyRef, addedFunctionality) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = extendFunction;
+  module.exports = window.extendFunction;
 }
+})( this );
