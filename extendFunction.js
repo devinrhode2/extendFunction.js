@@ -7,7 +7,8 @@
  * MIT Licensed
  */
 (function(window, undefined){
-  //      window refers to the global "this"
+  // window refers to the global `this`.
+  // This function should work fine in node.
   function extendFunction(fnRef, addedFunctionality) {
     // not doing 'use strict' because it changes what `this` means, and extendFunction
     // should be as seamless as possible
@@ -61,7 +62,7 @@
     function extendedFunction() {
       // TODO: write a test that verifies `this` refers to what it should refer too.
       // For example, if you do extendFunction('$.ajax', function(){ this === window.$; });
-      var args = Array.prototype.slice.call(arguments); // Array.prototype.slice uses less memory than [].slice because it doesn't allocate a new array
+      var args = Array.prototype.slice.call(arguments);
 
       // EXTEND originalFunction TO TRACK IF IT WAS CALLED
       var wasOriginalCalled = false;
@@ -91,25 +92,25 @@
         wasOrignalCalled = true; // Original WILL be called, so we're just going to say it was already
       }
 
-      var oldRet;
-      var newRet = addedFunctionality.call(this, args, originalFunction, dontCallOriginal);
+      var originalReturn;
+      var newReturn = addedFunctionality.call(this, args, originalFunction, dontCallOriginal);
       if (!wasOriginalCalled) {
         wasOriginalCalled = false; // reset in case a function dynamically calls the originalFunction (??)
-        oldRet = originalFunction.apply(this, args);
+        originalReturn = originalFunction.apply(this, args);
       }
 
-      if (newRet === undefined) {
-        return oldRet;
-      } else {
-        return newRet;
-      }
-    } // end extendedFunction
+      return (newReturn === undefined ?
+               originalReturn
+              :
+               newReturn
+             );
+    }
 
     // Preserve function.length since extendedFunction doesn't list arguments!
     extendedFunction.length = originalFunction.length;
-    // Maintain prototype chain..
+
+    // Maintain prototype property
     extendedFunction.prototype = originalFunction.prototype;
-    //TODO: I'm not sure if someone does `new extendedFunction(..)` nothing different will happen
 
     // Maintain constructor property
     extendedFunction.constructor = originalFunction.constructor;
