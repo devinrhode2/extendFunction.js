@@ -2,14 +2,14 @@ extendFunction.js
 =================
 
 The easiest way to overwrite other functions with additional functionality
- 
+
 Example:
 Let's modify alert to keep a history array of all the messages we alert:
 ```javascript
 // paste extendFunction.js into your console and run these examples in your console :)
 
 window.alertHistory = [];
-// extend alert with additional functionality. 
+// extend alert with additional functionality.
 extendFunction('alert', function(args) {
   // args is an array of the arguments alert was called with
   // args[0] is the alert message.
@@ -59,7 +59,7 @@ localFunction = function(paramA, paramB) {
  return oldLocalFunction.apply(this, args);
 };
 ```
- 
+
 Modify return values:
 ```javascript
 extendFunction('strangeModule.strangeMethod', function(args, prevFunc) {
@@ -83,6 +83,24 @@ extendFunction('$.ajax', function(args, prevFunc) {
     console.error('request failed:', arguments, 'stackOnSend:', stackOnSend);
   });
   return returnValue;
+});
+```
+
+I'm calling the original function asynchronously, but notice `extendFunction` is also calling it.
+
+###### What's going on?
+
+When extendFunction sees you haven't called the original function, it calls it for you - and, if you didn't return anything (i.e. `undefined` was returned) then extendFunction will return the value returned from the original function.
+
+###### Tell extendFunction not to call the originalFunction at all:
+
+```javascript
+extendFunction(fn, function(args, originalFunction, dontCallOriginal){
+  dontCallOriginal();
+  $.getJSON('/posts')
+  .done(function(json){
+    originalFunction(json);
+  });
 });
 ```
 
