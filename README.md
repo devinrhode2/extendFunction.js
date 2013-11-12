@@ -23,7 +23,7 @@ if (alertHistory[0] === 'a message') {
 }
 ```
 
-So extendFunction takes 2 parameters: `extendFunction(theFunction, extraFunctionality)`
+So extendFunction takes 2 parameters: `extendFunction(theFunction, additionalFunctionality)`
 
 Now let's add __" from DevinRhode2"__ to every alert message
 ```javascript

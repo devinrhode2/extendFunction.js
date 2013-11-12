@@ -6,9 +6,16 @@
  * Copyright (c) 2013 extendFunction.js contributors
  * MIT Licensed
  */
-(function(window, undefined){
-  // window refers to the global `this`.
-  // This function should work fine in node.
+(function(){
+  var window = this; // this === window in the browser, this === global in node.
+  var undefined;
+
+  if (typeof module !== 'undefined') {
+    module.exports = extendFunction;
+  } else {
+    window.extendFunction = extendFunction;
+  }
+
   function extendFunction(fnRef, addedFunctionality) {
     // not doing 'use strict' because it changes what `this` means, and extendFunction
     // should be as seamless as possible
@@ -78,18 +85,20 @@
           // above we assumed originalFunction was a function if it wasn't a string (for efficiency) - here, we catch and correct if it wasn't a function.
           if (Object.prototype.toString.call(untrackedOriginal) != '[object Function]') {
             // to throw or not to throw?
-            throw new TypeError(fnRef + ' is not a function. ' + fnRef + ' toString value is:' +
-                            untrackedOriginal + ' and is of type:' + typeof untrackedOriginal);
-          } else {
-            fireUncaughtExcepton(e);
+            fireUncaughtExcepton(new TypeError([
+              fnRef + ' is not a function. ',
+              fnRef + '\'s toString is:' + untrackedOriginal,
+                 'It\'s type is:' + typeof untrackedOriginal
+            ].join('\n')));
           }
+          fireUncaughtExcepton(e); //always send browser provided error:
         }
       };
 
       // If the users additionalFunctionality function will call originalFunction asynchronously,
       // they can tell us NOT to call it
       function dontCallOriginal() {
-        wasOrignalCalled = true; // Original WILL be called, so we're just going to say it was already
+        wasOrignalCalled = true; // Original is going to be called, so we're just going to say it was already
       }
 
       var originalReturn;
@@ -106,21 +115,18 @@
              );
     }
 
-    // Preserve function.length since extendedFunction doesn't list arguments!
-    extendedFunction.length = originalFunction.length;
-
-    // Maintain prototype property
-    extendedFunction.prototype = originalFunction.prototype;
-
-    // Maintain constructor property
-    extendedFunction.constructor = originalFunction.constructor;
-
-    // Ensure all properties are copied over..
+    // Copy properties over:
     for (var prop in originalFunction) {
       if (Object.prototype.hasOwnProperty.call(originalFunction, prop)) {
         extendedFunction[prop] = originalFunction[prop];
       }
     }
+
+    // Make darn sure these properties are copied over too:
+    extendedFunction.length      = originalFunction.length;
+    extendedFunction.prototype   = originalFunction.prototype;
+    extendedFunction.constructor = originalFunction.constructor;
+    // Note: I don't know if this is absolutely necessary
 
     if (propertyArray && propertyArray.length === 0) {
       eval('(typeof window !== "undefined" ? window : global).' + fnRef + ' = ' + extendedFunction.toString());
@@ -128,9 +134,4 @@
       return extendedFunction;
     }
   }
-
-  if (typeof module !== 'undefined') {
-    module.exports = extendFunction;
-  }
-  window.extendFunction = extendFunction;
-})( this );
+})();
