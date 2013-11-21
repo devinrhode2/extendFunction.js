@@ -1,8 +1,26 @@
 {
-  "name": "extend-function",
-  "version": "0.0.5",
+  "name": "extendFunction.js",
   "main": "extendFunction.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/devinrhode2/extendFunction.js",
+  "authors": [
+    "Devin Rhode <devinrhode2@gmail.com>"
+  ],
   "dependencies": {
-    "fireUncaughtException": "latest"
+    "sendUncaughtException": "git://github.com/devinrhode2/sendUncaughtException"
+  },
+  "description": "The easiest way to overwrite other functions with additional functionality, aka decorators in python",
+  "keywords": [
+    "decorators",
+    "overwrite",
+    "functions",
+    "additional",
+    "functionality"
+  ],
+  "license": "MIT",
+  "bugs": "https://github.com/devinrhode2/extendFunction.js/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devinrhode2/extendFunction.js.git"
   }
 }

@@ -10,12 +10,6 @@
   var window = this; // this === window in the browser, this === global in node.
   var undefined;
 
-  if (typeof module !== 'undefined') {
-    module.exports = extendFunction;
-  } else {
-    window.extendFunction = extendFunction;
-  }
-
   function extendFunction(fnRef, addedFunctionality) {
     // not doing 'use strict' because it changes what `this` means, and extendFunction
     // should be as seamless as possible
@@ -85,13 +79,13 @@
           // above we assumed originalFunction was a function if it wasn't a string (for efficiency) - here, we catch and correct if it wasn't a function.
           if (Object.prototype.toString.call(untrackedOriginal) != '[object Function]') {
             // to throw or not to throw?
-            fireUncaughtExcepton(new TypeError([
+            sendUncaughtExcepton(new TypeError([
               fnRef + ' is not a function. ',
               fnRef + '\'s toString is:' + untrackedOriginal,
                  'It\'s type is:' + typeof untrackedOriginal
             ].join('\n')));
           }
-          fireUncaughtExcepton(e); //always send browser provided error:
+          return sendUncaughtExcepton(e); //always send browser provided error:
         }
       };
 
@@ -126,12 +120,20 @@
     extendedFunction.length      = originalFunction.length;
     extendedFunction.prototype   = originalFunction.prototype;
     extendedFunction.constructor = originalFunction.constructor;
-    // Note: I don't know if this is absolutely necessary
+    // I don't know if this is absolutely necessary, but I'd rather be safe than sorry.
+    // If you know the deep intricacies around the constructor and prototype properties,
+    // please add tests and, if they can be removed, submit a pull request.
 
     if (propertyArray && propertyArray.length === 0) {
       eval('(typeof window !== "undefined" ? window : global).' + fnRef + ' = ' + extendedFunction.toString());
     } else {
       return extendedFunction;
     }
+  }
+
+  if (typeof module !== 'undefined') {
+    module.exports = extendFunction;
+  } else {
+    window.extendFunction = extendFunction;
   }
 })();
