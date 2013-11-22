@@ -98,8 +98,8 @@
       var originalReturn;
       var newReturn = addedFunctionality.call(this, args, originalFunction, dontCallOriginal);
       if (!wasOriginalCalled) {
-        wasOriginalCalled = false; // reset in case a function dynamically calls the originalFunction (??)
         originalReturn = originalFunction.apply(this, args);
+        wasOriginalCalled = false; // reset in case a function dynamically calls the originalFunction (??)
       }
 
       return (newReturn === undefined ?
