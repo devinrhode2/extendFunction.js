@@ -20,7 +20,7 @@
     var originalFunction;
 
     // type check like underscore/lodash.
-    // (..advanced: we could assume it's a function and course-correct if it's a string, but that's a little gnarly for a prime use case)
+    // (..advanced: we could assume it's a function and correct ourselves if it's a string, but that's a little gnarly for a prime use case)
     if (Object.prototype.toString.call(fnRef) == '[object String]') {
 
       // Example: split 'jQuery.ajax' into ['jQuery', 'ajax']
@@ -118,14 +118,17 @@
       }
     }
 
-    // Make darn sure these properties are copied over too:
-    extendedFunction.length      = originalFunction.length;
+    //maintain/preserve prototype and constructor chains. Note: we're not actually creating a new class.
     extendedFunction.prototype   = originalFunction.prototype;
     extendedFunction.constructor = originalFunction.constructor;
-    // I don't know if this is absolutely necessary, but I'd rather be safe than sorry.
-    // If you know the deep intricacies around the constructor and prototype properties,
-    // please add tests and, if they can be removed, submit a pull request.
-
+    extendedFunction.name        = originalFunction.name || 'httpBitLyDevinsFunctionNamingConvention';
+    // if check non-standard function properties:
+    if (typeof originalFunction.length !== 'undefined') { // if 0, then extendedFunction.length already === 0
+      extendedFunction.length = originalFunction.length; //extendedFunction doesn't list arguments!
+    }
+    if (originalFunction.__proto__) {
+      extendedFunction.__proto__ = originalFunction.__proto__;
+    }
     if (propertyArray && propertyArray.length === 0) {
       eval('(typeof window !== "undefined" ? window : global).' + fnRef + ' = ' + extendedFunction.toString());
     } else {
