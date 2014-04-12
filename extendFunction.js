@@ -75,7 +75,7 @@
         try {
           // should we store this above and then use that variable? I don't know
           return untrackedOriginal.apply(this, Array.prototype.slice.call(arguments));
-          // we use standard dynamic `arguments` instead of `args` because there are not necessarily always the same
+          // we use standard dynamic `arguments` instead of `args` because they are not necessarily always the same
           // if a user modifies the arguments they call originalFunction with (extendFunction(function(args, originalFunction){ .. ) then we have to respect that
         } catch (e) {
           // above we assumed originalFunction was a function if it wasn't a string (for efficiency) - here, we catch and correct if it wasn't a function.
