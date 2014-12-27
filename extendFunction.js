@@ -94,7 +94,7 @@
       // If the users additionalFunctionality function will call originalFunction asynchronously,
       // they can tell us NOT to call it
       function dontCallOriginal() {
-        wasOrignalCalled = true; // Original is going to be called, so we're just going to say it was already
+        wasOriginalCalled = true; // Original is going to be called, so we're just going to say it was already
       }
 
       var originalReturn;
