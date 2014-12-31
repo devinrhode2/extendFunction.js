@@ -51,12 +51,12 @@ localFunction = extendFunction(localFunction, function(args, originalLocalFuncti
 });
 ```
 without extendFunction, you have to write this mess of code:
-```
+```javascript
 var oldLocalFunction = localFunction;
 localFunction = function(paramA, paramB) {
- // your magic here!
- var args = Array.prototype.slice.call(arguments);
- return oldLocalFunction.apply(this, args);
+  // your magic here!
+  var args = Array.prototype.slice.call(arguments);
+  return oldLocalFunction.apply(this, args);
 };
 ```
 
