@@ -70,7 +70,7 @@
       // EXTEND originalFunction TO TRACK IF IT WAS CALLED
       var wasOriginalCalled = false;
       var untrackedOriginal = originalFunction;
-      originalFunction = function () {
+      var originalFunction = function () {
         wasOriginalCalled = true;
         try {
           // should we store this above and then use that variable? I don't know
@@ -82,9 +82,11 @@
           if (Object.prototype.toString.call(untrackedOriginal) != '[object Function]') {
             // to throw or not to throw?
             sendUncaughtExcepton(new TypeError([
-              fnRef + ' is not a function. ',
+              fnRef + ' is not actuall a function. ',
               fnRef + '\'s toString is:' + untrackedOriginal,
-                 'It\'s type is:' + typeof untrackedOriginal
+                 'typeof is:' + typeof untrackedOriginal +
+                 'Object#toString (type) is:' + Object.prototype.toString.call(untrackedOriginal),
+                 'the OObject#toString should be [object Function]'
             ].join('\n')));
           }
           return sendUncaughtExcepton(e); //always send browser provided error:
@@ -113,15 +115,17 @@
 
     // Copy properties over:
     for (var prop in originalFunction) {
-      if (Object.prototype.hasOwnProperty.call(originalFunction, prop)) {
-        extendedFunction[prop] = originalFunction[prop];
-      }
+      extendedFunction[prop] = originalFunction[prop];
+    }
+    // Save reference to original, unextextended function(checking option to turn off for performance reasons)
+    if (extendFunction.dontSaveOriginals) {
+    	extendedFunction.originalUnextendedFunction = originalFunction
     }
 
     //maintain/preserve prototype and constructor chains. Note: we're not actually creating a new class.
     extendedFunction.prototype   = originalFunction.prototype;
     extendedFunction.constructor = originalFunction.constructor;
-    extendedFunction.name        = originalFunction.name || 'httpBitLyDevinsFunctionNamingConvention';
+    extendedFunction.name        = originalFunction.name || 'you_should_be_naming_your_functions_not_javascript_libraries';
     // if check non-standard function properties:
     if (typeof originalFunction.length !== 'undefined') { // if 0, then extendedFunction.length already === 0
       extendedFunction.length = originalFunction.length; //extendedFunction doesn't list arguments!
@@ -129,6 +133,9 @@
     if (originalFunction.__proto__) {
       extendedFunction.__proto__ = originalFunction.__proto__;
     }
+
+    // Define globally on window or return.
+    // properties from propertyArray are depleted above, look for `while (propertyArray.length)`
     if (propertyArray && propertyArray.length === 0) {
       eval('(typeof window !== "undefined" ? window : global).' + fnRef + ' = ' + extendedFunction.toString());
     } else {
