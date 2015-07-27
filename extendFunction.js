@@ -46,12 +46,12 @@
           if (originalFunction === undefined) {
             // ...but don't we want to prevent having originalFunction.undefined in the first place?
             // Nope, we just assume good input for efficiency, but catch the exception here when it happens.
-            return sendUncaughtExcepton(
+            return sendUncaughtException(
               new TypeError('window.' + fnRef + ' is undefined and therefore cannot be extended as a function.')
             );
           } else {
             // ...who knows what happened!
-            return sendUncaughtExcepton(cantReadPropOfUndefined);
+            return sendUncaughtException(cantReadPropOfUndefined);
           }
         }
       }
@@ -81,7 +81,7 @@
           // above we assumed originalFunction was a function if it wasn't a string (for efficiency) - here, we catch and correct if it wasn't a function.
           if (Object.prototype.toString.call(untrackedOriginal) != '[object Function]') {
             // to throw or not to throw?
-            sendUncaughtExcepton(new TypeError([
+            sendUncaughtException(new TypeError([
               fnRef + ' is not actuall a function. ',
               fnRef + '\'s toString is:' + untrackedOriginal,
                  'typeof is:' + typeof untrackedOriginal +
@@ -89,7 +89,7 @@
                  'the OObject#toString should be [object Function]'
             ].join('\n')));
           }
-          return sendUncaughtExcepton(e); //always send browser provided error:
+          return sendUncaughtException(e); //always send browser provided error:
         }
       };
 
