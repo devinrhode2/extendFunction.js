@@ -9,6 +9,15 @@
 (function(){
   var window = this; // this === window in the browser, this === global in node.
   var undefined;
+  function sendUncaughtException(e) {
+    if (window.sendUncaughtException) {
+      return sendUncaughtException(e)
+    } else if (window.onuncaughtException) {
+      return window.onuncaughtException(e)
+    } else {
+      throw e
+    }
+  }
 
   function extendFunction(fnRef, addedFunctionality) {
     // not doing 'use strict' because it changes what `this` means, and extendFunction
@@ -37,7 +46,7 @@
       // so while there are properties left to access..
       while (propertyArray.length) {
         try {
-          originalFunction = originalFunction[propertyArray.shift()];
+          originalFunction = originalFunction[propertyArray.shift()]
 
           //  if  originalFunction[propArray[0]]       is      undefined,
           // then originalFunction[propArray[0]][propArray[1]] will throw because this is essentially doing window.undefined.undefined
@@ -48,10 +57,9 @@
             // Nope, we just assume good input for efficiency, but catch the exception here when it happens.
             return sendUncaughtException(
               new TypeError('window.' + fnRef + ' is undefined and therefore cannot be extended as a function.')
-            );
+            )
           } else {
-            // ...who knows what happened!
-            return sendUncaughtException(cantReadPropOfUndefined);
+            return sendUncaughtException(cantReadPropOfUndefined)
           }
         }
       }
