@@ -1,22 +1,15 @@
 /*!
- * extendFunction.js - The easiest way to overwrite other functions with additional functionality
- *
- * github.com/devinrhode2/extendFunction.js
- *
- * Copyright (c) 2013 extendFunction.js contributors
- * MIT Licensed
- */
+* extendFunction.js - The easiest way to overwrite other functions with additional functionality
+*
+* github.com/devinrhode2/extendFunction.js
+*
+* Copyright (c) 2013 extendFunction.js contributors
+* MIT Licensed
+*/
 (function(){
-  var window = this; // this === window in the browser, this === global in node.
   var undefined;
   function sendUncaughtException(e) {
-    if (window.sendUncaughtException) {
-      return sendUncaughtException(e)
-    } else if (window.onuncaughtException) {
-      return window.onuncaughtException(e)
-    } else {
-      throw e
-    }
+    console.warn(e);
   }
 
   function extendFunction(fnRef, addedFunctionality) {
@@ -90,11 +83,11 @@
           if (Object.prototype.toString.call(untrackedOriginal) != '[object Function]') {
             // to throw or not to throw?
             sendUncaughtException(new TypeError([
-              fnRef + ' is not actuall a function. ',
+              fnRef + ' may not actually be a function. ',
               fnRef + '\'s toString is:' + untrackedOriginal,
-                 'typeof is:' + typeof untrackedOriginal +
-                 'Object#toString (type) is:' + Object.prototype.toString.call(untrackedOriginal),
-                 'the OObject#toString should be [object Function]'
+                'typeof is:' + typeof untrackedOriginal +
+                '\nObject#toString (type) is:' + Object.prototype.toString.call(untrackedOriginal),
+                '\nthe Object#toString should be [object Function]'
             ].join('\n')));
           }
           return sendUncaughtException(e); //always send browser provided error:
@@ -115,10 +108,10 @@
       }
 
       return (newReturn === undefined ?
-               originalReturn
+              originalReturn
               :
-               newReturn
-             );
+              newReturn
+            );
     }
 
     // Copy properties over:
@@ -127,7 +120,7 @@
     }
     // Save reference to original, unextextended function(checking option to turn off for performance reasons)
     if (extendFunction.dontSaveOriginals) {
-    	extendedFunction.originalUnextendedFunction = originalFunction
+      extendedFunction.originalUnextendedFunction = originalFunction
     }
 
     //maintain/preserve prototype and constructor chains. Note: we're not actually creating a new class.
@@ -151,53 +144,5 @@
     }
   }
 
-
-  // Export/define function just like lodash
-
-  /** Used to determine if values are of the language type Object */
-  var objectTypes = {
-    'function': true,
-    'object': true
-  };
-
-  /** Used as a reference to the global object */
-  var root = (objectTypes[typeof window] && window) || this;
-
-  /** Detect free variable `exports` */
-  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
-
-  /** Detect free variable `module` */
-  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
-
-  /** Detect the popular CommonJS extension `module.exports` */
-  var moduleExports = freeModule && freeModule.exports === freeExports && freeExports;
-
-  /** Detect free variable `global` from Node.js or Browserified code and use it as `root` */
-  var freeGlobal = objectTypes[typeof global] && global;
-  if (freeGlobal && (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal)) {
-    root = freeGlobal;
-  }
-
-  // some AMD build optimizers like r.js check for condition patterns like the following:
-  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // define as a named module like jQuery and underscore.js
-    define("extendFunction", [], function () {
-      return extendFunction;
-    });
-  }
-  // check for `exports` after `define` in case a build optimizer adds an `exports` object
-  else if (freeExports && freeModule) {
-    // in Node.js or RingoJS
-    if (moduleExports) {
-      freeModule.exports = extendFunction;
-    }
-    // in Narwhal or Rhino -require
-    else {
-      freeExports.extendFunction = extendFunction;
-    }
-  }
-  else {
-    // in a browser or Rhino
-    root.extendFunction = extendFunction;
-  }
-}).call(this);
+  window.extendFunction = extendFunction;
+}).call(window);
