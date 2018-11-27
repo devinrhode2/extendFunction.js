@@ -71,7 +71,7 @@
       // EXTEND originalFunction TO TRACK IF IT WAS CALLED
       var wasOriginalCalled = false;
       var untrackedOriginal = originalFunction;
-      var originalFunction = function () {
+      originalFunction = function () {
         wasOriginalCalled = true;
         try {
           // should we store this above and then use that variable? I don't know
